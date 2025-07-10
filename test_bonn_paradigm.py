@@ -45,7 +45,7 @@ class TestBonnParadigmExport(unittest.TestCase):
         if not os.path.isdir(cls.raw_data_path):
             raise unittest.SkipTest(
                 f"Bonn EEG dataset not found at the specified path: {cls.raw_data_path}. "
-                "Please ensure the dataset is in 'Dataset/Bonn_EEG/' relative to the project root."
+                "Please ensure the dataset is in 'MetaBCI/Dataset/Bonn_EEG/' relative to the project root."
             )
 
         # 为测试输出创建一个干净的目录

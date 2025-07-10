@@ -5,6 +5,11 @@ This project provides an open-source, interactive platform for end-to-end deep l
 
 While the platform is designed to be flexible, its core application focuses on a high-performance Cosine-similarity-based Convolutional Neural Network (CosCNN) for epilepsy detection, achieving state-of-the-art results on standard benchmarks. The project is designed to bridge the gap between complex deep learning algorithms and intuitive, interactive applications for researchers.
 
+## Overall Effect
+After running the program, the graphical interface starts successfully. Users can smoothly use the interface controls to complete a series of operations, including model configuration, loading/saving settings, initiating training, monitoring logs, and viewing the confusion matrix. The entire interaction process is stable and functions as designed.
+
+![EpiCosCNN-Meta GUI](GUI_img.png)
+
 ## Citation
 
 Mei, J., Luo, R., Xu, L., Zhao, W., Wen, S., Wang, K., ... & Ming, D. (2023). MetaBCI: An open-source platform for brain-computer interfaces. Computers in Biology and Medicine, 107806.
@@ -20,6 +25,7 @@ beginner-git, "CosCNN-DTQ-Toolbox," 2021. Accessed: Jul. 10, 2025. [Software]. A
 
 - [EpiCosCNN-Meta](#epicoscnn-meta)
   - [Welcome!](#welcome)
+  - [Overall Effect](#overall-effect)
   - [Citation](#citation)
   - [Content](#content)
   - [What are we doing?](#what-are-we-doing)

@@ -34,7 +34,7 @@ class SafeLog(nn.Module):
         return torch.log(torch.clamp(X, min=self.eps))
 
 
-@SkorchNet  # TODO: Bug Fix required:  unable to make docs with this wrapper
+# @SkorchNet  # TODO: Bug Fix required:  unable to make docs with this wrapper
 class ShallowNet(nn.Module):
 
     """

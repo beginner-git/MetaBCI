@@ -72,23 +72,23 @@ class TrainingApplication:
         self.paned_window.add(self.left_frame, weight=1)
         self.paned_window.add(self.right_frame, weight=1)
 
-        # 设置右侧框架的最小宽度
-        self.min_right_frame_width = 365  # 设置所需的最小宽度
+        # Set the minimum width for the right frame
+        self.min_right_frame_width = 365  # Set the desired minimum width
 
-        # 初始化UI组件
+        # Initialize UI components
         self.ui = TrainingConfigUI(self.left_frame, self.on_config_update)
         self.create_control_panel()
         self.create_log_area()
 
-        # 配置调整大小时的网格权重
+        # Configure grid weights for resizing
         self.left_frame.columnconfigure(0, weight=1)
         self.left_frame.rowconfigure(0, weight=1)
 
-        # 训练状态标志和线程
+        # Training status flag and thread
         self.is_training = False
         self.training_thread = None
 
-        # 确保右侧框架保持最小宽度的功能
+        # Function to ensure the right frame maintains its minimum width
         def check_sash_position(event=None):
             self.root.update_idletasks()
             paned_width = self.paned_window.winfo_width()
@@ -102,22 +102,22 @@ class TrainingApplication:
         self.paned_window.bind("<ButtonRelease-1>", check_sash_position)
         self.root.after(100, check_sash_position)
 
-        # 在窗口显示后初始化sash位置
+        # Initialize sash position after the window is displayed
         self.root.after(100, check_sash_position)
 
-        # 绑定窗口关闭事件
+        # Bind window closing event
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
 
     def on_closing(self):
-        """处理窗口关闭事件，确保子进程被正确终止。"""
+        """Handles the window closing event, ensuring child processes are terminated correctly."""
         if self.is_training:
             self.stop_training()
-            # 在实际应用中，可能需要等待训练线程结束
+            # In a real application, it might be necessary to wait for the training thread to finish
 
         if self.prediction_worker and self.prediction_worker.is_alive():
             self.log_message("Stopping prediction worker...", "info")
             self.prediction_worker.stop()
-            self.prediction_worker.join()  # 等待进程结束
+            self.prediction_worker.join()  # Wait for the process to terminate
             self.log_message("Prediction worker stopped.", "success")
 
         self.root.destroy()
@@ -701,7 +701,7 @@ class TrainingApplication:
             fold_config (dict): Fold configuration.
             fold_data (dict): Fold data dictionary.
         """
-        parent_dir = os.getcwd()  # 获取当前工作目录
+        parent_dir = os.getcwd()  # Get the current working directory
         save_dir = os.path.join(parent_dir, '../algorithms/deep_learning/trained_models')
         os.makedirs(save_dir, exist_ok=True)
 
@@ -804,7 +804,7 @@ class TrainingApplication:
             'date_saved': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
 
-        parent_dir = os.getcwd()  # 获取当前工作目录
+        parent_dir = os.getcwd()  # Get the current working directory
         save_dir = os.path.join(parent_dir, '../trained_models')
         best_model_path = os.path.join(save_dir, 'best_model')
         os.makedirs(best_model_path, exist_ok=True)
@@ -901,9 +901,9 @@ class TrainingApplication:
 
     def _create_plot_window_for_channel(self, channel_idx):
         """
-        为特定通道创建绘图窗口。
-        此版本将数据源逻辑封装在PlaybackManager中，以确保绘图窗口
-        在代码结构上无法访问“未来”的数据。
+        Creates a plot window for a specific channel.
+        This version encapsulates the data source logic in a PlaybackManager to ensure
+        that the plot window cannot access "future" data structurally.
         """
         data_for_plotting = np.squeeze(self.sigData)
         num_channels = data_for_plotting.shape[0]
@@ -937,8 +937,8 @@ class TrainingApplication:
                     next_channel_idx = np.random.randint(0, num_channels)
             self._create_plot_window_for_channel(next_channel_idx)
 
-        # --- 核心修改 ---
-        # 如果存在旧的worker，先停止它
+        # --- Core modification ---
+        # If an old worker exists, stop it first
         if self.prediction_worker and self.prediction_worker.is_alive():
             self.prediction_worker.stop()
             self.prediction_worker.join()
@@ -959,14 +959,14 @@ class TrainingApplication:
         TOTAL_NUM_CHUNKS = 32
         chunk_size = len(data_to_plot) // TOTAL_NUM_CHUNKS
 
-        # 创建一个PlaybackManager实例，它将作为“实时”数据源。
+        # Create a PlaybackManager instance, which will act as the "real-time" data source.
         playback_manager = PlaybackManager(
             full_data_stream=data_to_plot,
             sampling_rate=PLAYBACK_FREQ_HZ,
             chunk_size=chunk_size
         )
 
-        # 创建绘图窗口，传递worker和队列，而不是原始模型。
+        # Create the plot window, passing the worker and queue, not the raw model.
         RealtimePlotWindow(
             parent=self.root,
             playback_manager=playback_manager,

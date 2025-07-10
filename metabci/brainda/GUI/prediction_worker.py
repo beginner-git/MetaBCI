@@ -9,8 +9,8 @@ from metabci.brainda.algorithms.deep_learning.models import CosCNN
 
 class PredictionWorker(ProcessWorker):
     """
-    一个专用的进程工作器，用于在独立进程中运行模型预测。
-    它接收数据块，执行推理，并通过队列将结果发送回去。
+    A dedicated process worker for running model predictions in a separate process.
+    It receives data chunks, performs inference, and sends the results back through a queue.
     """
 
     def __init__(self, model_state: dict, model_config: dict, result_queue: multiprocessing.Queue, **kwargs):
@@ -23,8 +23,8 @@ class PredictionWorker(ProcessWorker):
 
     def pre(self):
         """
-        在主循环之前执行。
-        负责初始化模型并将其移动到适当的设备上。
+        Executes before the main loop.
+        Responsible for initializing the model and moving it to the appropriate device.
         """
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -42,12 +42,12 @@ class PredictionWorker(ProcessWorker):
 
     def consume(self, data: np.ndarray):
         """
-        消费一个数据块，运行预测，并将结果放入结果队列。
+        Consumes a data chunk, runs a prediction, and places the result into the result queue.
         """
         try:
             input_tensor = torch.from_numpy(data).float()
 
-            # ** 新增 **：处理数据填充和截断，以匹配模型输入
+            # ** NEW **: Handle data padding and truncation to match model input.
             expected_length = self._model_config.get('input_length')
             if expected_length and len(input_tensor) != expected_length:
                 if len(input_tensor) > expected_length:
@@ -56,7 +56,7 @@ class PredictionWorker(ProcessWorker):
                     padding = torch.zeros(expected_length - len(input_tensor))
                     input_tensor = torch.cat((input_tensor, padding))
 
-            # 为模型准备张量形状：(batch_size, in_channels, sequence_length)
+            # Prepare tensor shape for the model: (batch_size, in_channels, sequence_length)
             input_tensor = input_tensor.unsqueeze(0).unsqueeze(0)
             input_tensor = input_tensor.to(self.device)
 
@@ -77,7 +77,7 @@ class PredictionWorker(ProcessWorker):
 
     def post(self):
         """
-        主循环结束后执行。清理资源。
+        Executes after the main loop finishes. Cleans up resources.
         """
         self.model = None
         self.device = None

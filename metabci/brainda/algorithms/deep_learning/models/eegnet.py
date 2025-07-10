@@ -1,12 +1,3 @@
-#
-# models/CustomModel.py
-#
-# 版本: 最终版 - 针对 EEGNet 的完全自包含与延迟初始化
-# 描述: 这是一个完全独立的适配器文件。它包含了 EEGNet 所需的全部辅助函数，
-#       并采用延迟初始化策略，以适应无法在构造时提供完整维度信息的框架。
-#       此版本解决了 "Dummy function" 导入错误。
-#
-
 from collections import OrderedDict
 import math
 
@@ -15,40 +6,35 @@ import torch.nn as nn
 from torch import Tensor
 
 
-# ==================================================================
-# =================== [ 1. 必需的辅助工具定义 ] =====================
-# 我们在这里重新定义 EEGNet 需要的所有辅助类和函数，使其不再有外部依赖。
-# ==================================================================
-
 def compute_same_pad2d(input_size, kernel_size, stride=(1, 1)):
     """
-    计算在 PyTorch 中实现 'same' 填充所需的填充量。
-    返回一个适合 nn.ConstantPad2d 的元组。
+    Calculates the padding amount required to implement 'same' padding in PyTorch.
+    Returns a tuple suitable for nn.ConstantPad2d.
     """
     in_h, in_w = input_size
     k_h, k_w = kernel_size
     s_h, s_w = stride
 
-    # 使用向上取整确保输出尺寸不小于 'same' 模式下的尺寸
+    # Use ceiling to ensure the output size is not smaller than the size in 'same' mode
     pad_h = max(0, (math.ceil(in_h / s_h) - 1) * s_h + k_h - in_h)
     pad_w = max(0, (math.ceil(in_w / s_w) - 1) * s_w + k_w - in_w)
 
-    # PyTorch 的 ConstantPad2d 需要 (pad_left, pad_right, pad_top, pad_bottom)
+    # PyTorch's ConstantPad2d requires (pad_left, pad_right, pad_top, pad_bottom)
     return (pad_w // 2, pad_w - pad_w // 2, pad_h // 2, pad_h - pad_h // 2)
 
 
 @torch.no_grad()
 def _apply_max_norm(module, max_norm_value=1.0, name='weight', eps=1e-8):
-    """一个通用的函数，用于对权重张量应用最大范数约束。"""
+    """A general function for applying a max-norm constraint to a weight tensor."""
     weight = getattr(module, name)
     norm = torch.norm(weight, p=2, dim=0, keepdim=True)
     desired = torch.clamp(norm, 0, max_norm_value)
-    # 按比例缩放权重
+    # Scale the weights proportionally
     weight.data = weight.data * (desired / (eps + norm))
 
 
 class MaxNormConstraintConv2d(nn.Conv2d):
-    """带有最大范数约束的2D卷积层。"""
+    """A 2D convolutional layer with a max-norm constraint."""
 
     def __init__(self, *args, max_norm_value=1.0, **kwargs):
         self.max_norm_value = max_norm_value
@@ -60,7 +46,7 @@ class MaxNormConstraintConv2d(nn.Conv2d):
 
 
 class MaxNormConstraintLinear(nn.Linear):
-    """带有最大范数约束的线性层。"""
+    """A linear layer with a max-norm constraint."""
 
     def __init__(self, *args, max_norm_value=0.25, **kwargs):
         self.max_norm_value = max_norm_value
@@ -74,7 +60,7 @@ class MaxNormConstraintLinear(nn.Linear):
 @torch.no_grad()
 def _glorot_weight_zero_bias(model):
     """
-    使用 Xavier/Glorot 均匀分布初始化权重，并将偏置设为零。
+    Initializes weights with Xavier/Glorot uniform distribution and sets biases to zero.
     """
     for module in model.modules():
         if isinstance(module, (nn.Linear, nn.Conv2d)):
@@ -86,7 +72,7 @@ def _glorot_weight_zero_bias(model):
 
 class SeparableConv2d(nn.Module):
     """
-    可分离卷积，由一个深度卷积和一个逐点卷积组成。
+    Separable convolution, composed of a depthwise convolution and a pointwise convolution.
     """
 
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, bias=False, D=2):
@@ -103,14 +89,15 @@ class SeparableConv2d(nn.Module):
 
 
 # ==================================================================
-# ================= [ 2. 内部 EEGNet 模型定义 ] ===================
-# 这是原始的 EEGNet 实现，现在它只依赖于上面定义的内部函数。
+# ================= [ 2. Internal EEGNet Model Definition ] ===================
+# This is the original EEGNet implementation, which now only depends on the
+# internal functions defined above.
 # ==================================================================
 
 class _EEGNetInternal(nn.Module):
     def __init__(self, n_channels, n_samples, n_classes):
         super().__init__()
-        # 定义模型超参数
+        # Define model hyperparameters
         F1, D = 8, 2
         F2 = F1 * D
         time_kernel_size = 64
@@ -121,7 +108,7 @@ class _EEGNetInternal(nn.Module):
         fc_norm_rate = 0.25
         depthwise_norm_rate = 1.0
 
-        # --- 第一块：时间卷积 + 深度卷积 ---
+        # --- First block: Temporal convolution + Depthwise convolution ---
         self.block1 = nn.Sequential(
             nn.ConstantPad2d(compute_same_pad2d((n_channels, n_samples), (1, time_kernel_size)), 0),
             nn.Conv2d(1, F1, (1, time_kernel_size), bias=False),
@@ -133,7 +120,7 @@ class _EEGNetInternal(nn.Module):
             nn.Dropout(dropout_rate)
         )
 
-        # --- 第二块：可分离卷积 ---
+        # --- Second block: Separable convolution ---
         with torch.no_grad():
             dummy_input = torch.zeros(1, 1, n_channels, n_samples)
             out_block1 = self.block1(dummy_input)
@@ -150,7 +137,7 @@ class _EEGNetInternal(nn.Module):
             nn.Flatten()
         )
 
-        # --- 分类器 ---
+        # --- Classifier ---
         with torch.no_grad():
             dummy_out_block2 = self.block2(out_block1)
             n_flattened_features = dummy_out_block2.shape[1]
@@ -167,17 +154,7 @@ class _EEGNetInternal(nn.Module):
         return self.model(x)
 
 
-# ==================================================================
-# ================== [ 3. 公开的适配器模型 ] =====================
-# 这是你的框架将直接使用的最终类。
-# ==================================================================
-
 class CustomModel(nn.Module):
-    """
-    一个完全延迟初始化的适配器，用于将 EEGNet 模型集成到您的框架中。
-    它只在构造时接收 `num_classes`，并在第一次前向传播时构建完整模型。
-    """
-
     def __init__(self, num_classes: int):
         super().__init__()
         self.num_classes = num_classes
@@ -203,5 +180,4 @@ class CustomModel(nn.Module):
         return self.model(x)
 
 
-# 明确声明该模块对外暴露的接口，确保框架能找到 'CustomModel'
 __all__ = ['CustomModel']

@@ -10,9 +10,9 @@ from matplotlib.animation import FuncAnimation
 
 class RealtimePlotWindow:
     """
-    管理一个高性能、时间精确的数据回放窗口。
-    它从一个外部的 'playback_manager' 获取数据，确保自身无法访问“未来”的数据。
-    当需要预测时，它会将数据发送到一个独立的后台工作进程。
+    Manages a high-performance, time-accurate data playback window.
+    It gets data from an external 'playback_manager', ensuring it cannot access "future" data.
+    When a prediction is needed, it sends the data to a separate background worker process.
     """
 
     def __init__(self, parent, playback_manager, channel_index,
@@ -25,7 +25,7 @@ class RealtimePlotWindow:
         self.true_label = true_label
         self.next_callback = next_callback
 
-        # 存储工作进程和结果队列
+        # Store the worker process and result queue
         self.worker = prediction_worker
         self.queue = result_queue
         self.is_waiting_for_prediction = False
@@ -129,13 +129,13 @@ class RealtimePlotWindow:
         final_x, final_y = self.playback_manager.get_full_data_for_final_plot()
         self.line.set_data(final_x, final_y)
 
-        # 将预测任务交给后台进程
+        # Hand over the prediction task to the background process
         if run_prediction and self.worker:
             _, data_for_prediction = self.playback_manager.get_full_data_for_final_plot()
             if data_for_prediction.size > 0:
                 self.worker.put(data_for_prediction)
                 self.is_waiting_for_prediction = True
-                self._wait_for_prediction_and_update_ui()  # 开始轮询结果
+                self._wait_for_prediction_and_update_ui()  # Start polling for the result
 
         self.stop_button.config(state='disabled')
         if self.next_button:
@@ -144,13 +144,13 @@ class RealtimePlotWindow:
         self.canvas.draw_idle()
 
     def _wait_for_prediction_and_update_ui(self):
-        """非阻塞地轮询队列以获取预测结果。"""
+        """Polls the queue non-blockingly to get the prediction result."""
         if not self.is_waiting_for_prediction:
             return
 
         try:
             result = self.queue.get_nowait()
-            self.is_waiting_for_prediction = False  # 收到结果，停止轮询
+            self.is_waiting_for_prediction = False  # Received the result, stop polling
 
             if "error" in result:
                 self.ax.set_title(f"Channel {self.channel_index} - Prediction Error")
@@ -168,7 +168,7 @@ class RealtimePlotWindow:
             self.canvas.draw_idle()
 
         except Empty:
-            # 队列为空，50毫秒后再次检查
+            # Queue is empty, check again after 50ms
             self.window.after(50, self._wait_for_prediction_and_update_ui)
 
     def show_next(self):
@@ -187,7 +187,7 @@ class RealtimePlotWindow:
             self.is_running = False
             self.playback_manager.stop()
 
-        # 确保轮询循环停止
+        # Ensure the polling loop stops
         self.is_waiting_for_prediction = False
 
         if self.anim and self.anim.event_source:

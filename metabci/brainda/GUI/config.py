@@ -5,9 +5,9 @@ from copy import deepcopy
 
 @dataclass
 class TrainingConfig:
-    """训练配置参数"""
+    """Training configuration parameters"""
     input_length: int = 4096
-    in_channels = 1
+    in_channels: int = 1
     filter_length: int = 5
     num_filters_list: List[int] = None
     max_epochs: int = 240
@@ -16,10 +16,10 @@ class TrainingConfig:
     lr_end: float = 2e-5
     lr_drop_period: int = 50
     num_folds: int = 10
-    model_type: str = "default"  # 新增：模型类型（"default" 或 "custom"）
-    custom_model_path: str = None  # 新增：自定义模型路径
-    perform_quantization = False
-    quantization_script_path = "../quantization/main.py"
+    model_type: str = "default"  # Added: model type ("default" or "custom")
+    custom_model_path: str = None  # Added: custom model path
+    perform_quantization: bool = False
+    quantization_script_path: str = "../quantization/main.py"
     # Added data paths
     sig_data_path: str = "../data/sigData.json"
     label_data_path: str = "../data/labelData.json"
@@ -49,5 +49,5 @@ class TrainingConfig:
     def clone(self):
         new_config = TrainingConfig()
         for key, value in self.__dict__.items():
-            setattr(new_config, key, value)
+            setattr(new_config, key, deepcopy(value))
         return new_config

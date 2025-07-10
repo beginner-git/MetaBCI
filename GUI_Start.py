@@ -7,21 +7,17 @@ import sys
 import subprocess
 
 
-# =======================================================================
-# Part 1: 数据导出功能
-# =======================================================================
-
 def export_eeg_data():
     """
-    加载、处理、排序并导出Bonn EEG数据集。
-    如果所有步骤都成功，返回 True，否则返回 False。
+    Loads, processes, sorts, and exports the Bonn EEG dataset.
+    Returns True if all steps are successful, otherwise returns False.
     """
     try:
         print("=" * 60)
-        print("🚀 Part 1: 开始执行数据导出任务...")
+        print("🚀 Part 1: Starting data export task...")
         print("=" * 60)
-        print("--- 步骤 1: 正在加载数据... ---")
-        print("这将需要一些时间，因为我们正在处理全部 300 个文件。")
+        print("--- Step 1: Loading data... ---")
+        print("This may take a while as we are processing all 300 files.")
 
         from metabci.brainda.datasets.bonn_eeg import BonnEEGDataset
         from metabci.brainda.paradigms.Bonn_paradigm import BonnEEGParadigm
@@ -38,125 +34,119 @@ def export_eeg_data():
             n_jobs=-1,
             verbose=False,
         )
-        print("✅ 数据加载成功!")
+        print("✅ Data loaded successfully!")
 
-        # --- 步骤 2: 数据验证与缩放 ---
-        print("\n--- 步骤 2: 验证并缩放数据 ---")
+        # --- Step 2: Data validation and scaling ---
+        print("\n--- Step 2: Validating and scaling data ---")
         expected_trials = len(all_subjects) * len(events_with_labels)
-        assert x.shape == (expected_trials, 1, 4096), "数据 x 的形状不符合预期！"
-        assert y.shape == (expected_trials,), "标签 y 的形状不符合预期！"
-        print("✅ 数据形状验证通过。")
+        assert x.shape == (expected_trials, 1, 4096), "The shape of data x is not as expected!"
+        assert y.shape == (expected_trials,), "The shape of label y is not as expected!"
+        print("✅ Data shape validation passed.")
 
         x = x / 1e6
-        print("✅ 数据已通过除以 1e6 缩放回原始数值范围。")
+        print("✅ Data has been scaled back to its original value range by dividing by 1e6.")
 
-        # --- 步骤 3: 按标签分组排序 ---
-        print("\n--- 步骤 3: 按事件(标签)和被试排序数据 ---")
+        # --- Step 3: Sort by label group ---
+        print("\n--- Step 3: Sorting data by event (label) and subject ---")
         meta.sort_values(by=['event', 'subject'], inplace=True)
         sorted_indices = meta.index
         x_sorted = x[sorted_indices]
         y_sorted = y[sorted_indices]
-        print("✅ 数据已根据事件类型和被试ID重新排序。")
+        print("✅ Data has been reordered according to event type and subject ID.")
 
-        # --- 步骤 4: 导出为 JSON 文件到指定路径 ---
-        print("\n--- 步骤 4: 导出为 JSON 文件到指定路径 ---")
+        # --- Step 4: Export to JSON files at the specified path ---
+        print("\n--- Step 4: Exporting to JSON files at the specified path ---")
         output_dir = os.path.join('metabci', 'brainda', 'data')
         os.makedirs(output_dir, exist_ok=True)
-        print(f"✅ 确保输出目录存在: '{output_dir}'")
+        print(f"✅ Ensuring output directory exists: '{output_dir}'")
 
         sig_data_filename = os.path.join(output_dir, 'sigData.json')
         label_data_filename = os.path.join(output_dir, 'labelData.json')
 
-        print(f"⏳ 正在保存信号数据到 '{sig_data_filename}'...")
+        print(f"⏳ Saving signal data to '{sig_data_filename}'...")
         with open(sig_data_filename, 'w') as f:
             json.dump(x_sorted.tolist(), f)
-        print(f"✅ '{sig_data_filename}' 保存成功!")
+        print(f"✅ '{sig_data_filename}' saved successfully!")
 
-        print(f"⏳ 正在保存标签数据到 '{label_data_filename}'...")
+        print(f"⏳ Saving label data to '{label_data_filename}'...")
         with open(label_data_filename, 'w') as f:
             json.dump(y_sorted.tolist(), f)
-        print(f"✅ '{label_data_filename}' 保存成功!")
+        print(f"✅ '{label_data_filename}' saved successfully!")
 
-        print("\n🎉 数据导出任务全部完成！")
+        print("\n🎉 Data export task completed successfully!")
         return True
 
     except Exception as e:
         print("\n" + "=" * 60)
-        print(f"🔥 错误：数据导出过程中发生严重错误，无法继续。")
+        print(f"🔥 ERROR: A critical error occurred during data export. Cannot continue.")
         print("=" * 60)
         traceback.print_exc()
         return False
 
 
-# =======================================================================
-# Part 2: GUI 启动功能
-# =======================================================================
 
 def run_gui_application():
     """
-    一个健壮的启动器，用于从主项目目录运行子工程中的GUI应用。
+    A robust launcher to run the GUI application in the subproject
+    from the main project directory.
     """
     try:
         print("\n" + "=" * 60)
-        print("🚀 Part 2: 准备启动GUI应用程序...")
+        print("🚀 Part 2: Preparing to launch the GUI application...")
         print("=" * 60)
 
-        # 获取此启动器脚本所在的目录 (即项目根目录)
+        # Get the directory where this launcher script is located (i.e., the project root)
         launcher_dir = os.path.dirname(os.path.abspath(__file__))
 
-        # 构建到GUI子工程目录和其主脚本的路径
+        # Build the path to the GUI subproject directory and its main script
         gui_project_dir = os.path.join(launcher_dir, 'metabci', 'brainda', 'GUI')
         app_script_path = os.path.join(gui_project_dir, 'main.py')
 
-        # --- 提供友好的错误检查 ---
+        # --- Provide user-friendly error checking ---
         if not os.path.isdir(gui_project_dir):
-            print(f"❌ 错误：未找到GUI子工程目录。")
-            print(f"   期望路径: {gui_project_dir}")
+            print(f"❌ ERROR: GUI subproject directory not found.")
+            print(f"   Expected path: {gui_project_dir}")
             return
         if not os.path.isfile(app_script_path):
-            print(f"❌ 错误：在GUI目录中未找到主程序 'main.py'。")
-            print(f"   期望路径: {app_script_path}")
+            print(f"❌ ERROR: Main script 'main.py' not found in the GUI directory.")
+            print(f"   Expected path: {app_script_path}")
             return
 
-        # --- 执行启动 ---
-        print(f"✅ 找到GUI应用, 准备启动...")
-        print(f"   > 目标目录: {gui_project_dir}")
-        print(f"   > 执行脚本: {app_script_path}")
+        # --- Execute launch ---
+        print(f"✅ GUI application found, preparing to launch...")
+        print(f"   > Target directory: {gui_project_dir}")
+        print(f"   > Execution script: {app_script_path}")
 
-        # 使用 subprocess.run 来执行脚本
-        # 'cwd' 参数是这里的核心，它将子进程的工作目录设置为GUI的目录
-        # 'sys.executable' 确保我们使用与启动器相同的Python解释器
+        # Use subprocess.run to execute the script
+        # 'cwd' parameter is key here, setting the working directory of the child process to the GUI's directory
+        # 'sys.executable' ensures we use the same Python interpreter as the launcher
         subprocess.run(
             [sys.executable, app_script_path],
             cwd=gui_project_dir,
-            check=True  # 如果子进程返回错误代码，则会抛出异常
+            check=True  # This will raise an exception if the child process returns a non-zero exit code
         )
 
     except subprocess.CalledProcessError as e:
         print("\n" + "-" * 60)
-        print(f"❗️ GUI应用程序异常退出，返回错误码: {e.returncode}")
+        print(f"❗️ GUI application exited unexpectedly with return code: {e.returncode}")
     except Exception as e:
         print("\n" + "-" * 60)
-        print(f"🔥 GUI启动器发生未知错误: {e}")
+        print(f"🔥 An unknown error occurred in the GUI launcher: {e}")
         traceback.print_exc()
 
 
-# =======================================================================
-# Part 3: 主执行流程
-# =======================================================================
-
 if __name__ == '__main__':
-    # 首先，执行数据导出功能
+    # First, execute the data export function
     is_data_ready = export_eeg_data()
 
-    # 然后，检查数据是否准备就绪。如果是，则启动GUI
+    # Then, check if the data is ready. If so, launch the GUI
     if is_data_ready:
         run_gui_application()
     else:
         print("\n" + "=" * 60)
-        print("❌ 任务终止：由于数据导出失败，GUI应用程序将不会启动。")
+        print("❌ Task aborted: The GUI application will not be launched due to data export failure.")
         print("=" * 60)
-        # 暂停一下，让用户能看到错误信息
-        input("按 Enter 键退出...")
+        # Pause to allow the user to see the error message
+        input("Press Enter to exit...")
 
 

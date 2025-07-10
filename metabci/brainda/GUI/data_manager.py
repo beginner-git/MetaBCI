@@ -8,14 +8,15 @@ from sklearn.preprocessing import LabelEncoder
 
 def stratified_k_fold(labels, k):
     """
-    将标签集随机等分为 k 个 fold，保证每个 fold 中各个标签的数量尽可能相等
+    Randomly and evenly divide the label set into k folds, ensuring that the number
+    of each label in each fold is as equal as possible.
 
-    参数:
-    labels: 标签列表，例如 [0, 1, 2, 3, 0, 1, 2...]
-    k: fold 的数量
+    Args:
+        labels: A list of labels, e.g., [0, 1, 2, 3, 0, 1, 2...].
+        k: The number of folds.
 
-    返回:
-    fold_indices: 每个样本对应的 fold 索引（0 到 k-1）
+    Returns:
+        fold_indices: The fold index (from 0 to k-1) for each sample.
     """
     unique_labels = np.unique(labels)
     label_indices = {}
@@ -42,10 +43,10 @@ def stratified_k_fold(labels, k):
 
 
 class DataManager:
-    """处理数据加载和预处理的类"""
+    """A class to handle data loading and preprocessing."""
 
     def __init__(self, sig_path: str, divide: int, data_export_dir: str = None):
-        self.sig_path = sig_path  # 可以为 None
+        self.sig_path = sig_path  # Can be None
         self.divide = divide
         if data_export_dir is None:
             current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -55,52 +56,52 @@ class DataManager:
             self.data_export_dir = data_export_dir
         os.makedirs(self.data_export_dir, exist_ok=True)
 
-        # 确保目录存在
+        # Ensure the directory exists
         os.makedirs(self.data_export_dir, exist_ok=True)
 
     def export_cv_indices_and_metadata(self, cv_indices: np.ndarray, num_classes: int) -> Dict[str, str]:
         """
-        导出 cv_indices、num_classes 和 num_folds 到 JSON 文件
+        Export cv_indices, num_classes, and num_folds to JSON files.
 
-        参数:
-        cv_indices: 交叉验证索引
-        num_classes: 类别数量
+        Args:
+            cv_indices: Cross-validation indices.
+            num_classes: The number of classes.
 
-        返回:
-        Dict[str, str]: 包含导出文件路径的字典
+        Returns:
+            Dict[str, str]: A dictionary containing the paths to the exported files.
         """
         file_paths = {}
 
-        # 导出 cv_indices
+        # Export cv_indices
         cv_indices_path = os.path.join(self.data_export_dir, 'cv_indices.json')
         with open(cv_indices_path, 'w') as f:
             json.dump(cv_indices.tolist(), f)
         file_paths['cv_indices'] = cv_indices_path
 
-        # 导出 num_classes
+        # Export num_classes
         metadata_path = os.path.join(self.data_export_dir, 'metadata.json')
         with open(metadata_path, 'w') as f:
             json.dump({'num_classes': int(num_classes)}, f)
         file_paths['metadata'] = metadata_path
 
-        # 导出 divide 作为 num_folds
+        # Export divide as num_folds
         num_folds_path = os.path.join(self.data_export_dir, 'num_folds.json')
         with open(num_folds_path, 'w') as f:
             json.dump({'num_folds': self.divide}, f)
         file_paths['num_folds'] = num_folds_path
 
-        print(f"cv_indices、num_classes 和 num_folds 已导出到 {self.data_export_dir}")
+        print(f"cv_indices, num_classes, and num_folds have been exported to {self.data_export_dir}")
         return file_paths
 
     def load_data_from_json(self) -> Tuple[np.ndarray, np.ndarray]:
         """
-        从 JSON 文件加载 sigData 和 labelData
+        Load sigData and labelData from JSON files.
         """
         sig_data_path = os.path.join(self.data_export_dir, 'sigData.json')
         label_data_path = os.path.join(self.data_export_dir, 'labelData.json')
 
         if not os.path.exists(sig_data_path) or not os.path.exists(label_data_path):
-            raise FileNotFoundError(f"在 {self.data_export_dir} 中未找到所需的 JSON 文件 (sigData.json 或 labelData.json)")
+            raise FileNotFoundError(f"Required JSON files (sigData.json or labelData.json) not found in {self.data_export_dir}")
 
         with open(sig_data_path, 'r') as f:
             sigData = np.array(json.load(f))
@@ -108,7 +109,7 @@ class DataManager:
         with open(label_data_path, 'r') as f:
             labelData = np.array(json.load(f))
 
-        print(f"sigData 和 labelData 已从 {self.data_export_dir} 加载")
+        print(f"sigData and labelData have been loaded from {self.data_export_dir}")
         return sigData, labelData
 
     def load_and_preprocess_data(self, sig_data_path=None, label_data_path=None):
@@ -164,7 +165,7 @@ class DataManager:
 
     def export_to_json(self, sigData, labelData):
         """
-        将数据导出到 JSON 文件
+        Export data to JSON files.
         """
         sig_data_path = os.path.join(self.data_export_dir, 'sigData.json')
         label_data_path = os.path.join(self.data_export_dir, 'labelData.json')
@@ -172,11 +173,11 @@ class DataManager:
             json.dump(sigData.tolist(), f)
         with open(label_data_path, 'w') as f:
             json.dump(labelData.tolist(), f)
-        print(f"sigData 和 labelData 已导出到 {self.data_export_dir}")
+        print(f"sigData and labelData have been exported to {self.data_export_dir}")
 
     @staticmethod
     def get_train_val_idx(y_train_val: np.ndarray, coeff: float = 0.7) -> Tuple[np.ndarray, np.ndarray]:
-        """将数据分为训练集和验证集"""
+        """Split data into training and validation sets."""
         class_labels = np.unique(y_train_val)
         itrain = []
         ival = []

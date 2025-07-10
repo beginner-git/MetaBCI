@@ -4,11 +4,12 @@ import time
 
 class PlaybackManager:
     """
-    管理时间精确的播放模拟的状态和数据访问。
+    Manages the state and data access for a time-accurate playback simulation.
 
-    该类持有完整的历史数据，但只暴露那些根据已流逝时间
-    理应“已经到达”的部分。这模拟了一个无法看到未来的实时数据源，
-    同时确保了回放与真实时钟时间完美同步。
+    This class holds the complete historical data but only exposes the parts
+    that should have "arrived" based on the elapsed time. This simulates a
+    real-time data source that cannot see the future, while ensuring that the
+    playback is perfectly synchronized with real clock time.
     """
 
     def __init__(self, full_data_stream, sampling_rate, chunk_size):
@@ -22,26 +23,26 @@ class PlaybackManager:
         self.is_running = False
 
     def start(self):
-        """启动播放计时器。"""
+        """Starts the playback timer."""
         self.is_running = True
         self.start_time = time.time()
 
     def stop(self):
-        """停止播放。"""
+        """Stops the playback."""
         self.is_running = False
 
     def get_total_length(self):
-        """返回完整数据流的总样本数。"""
+        """Returns the total number of samples in the full data stream."""
         return self._total_data_length
 
     def get_full_data_for_final_plot(self):
-        """在动画结束后，返回完整的数据集用于最终的静态绘图。"""
+        """After the animation finishes, returns the complete dataset for a final static plot."""
         return self._x_data, self._full_data_stream
 
     def get_data_for_current_time(self):
         """
-        计算并返回与当前流逝时间对应的数据切片。
-        这是模拟实时数据到达的核心方法。
+        Calculates and returns the data slice corresponding to the current elapsed time.
+        This is the core method for simulating real-time data arrival.
         """
         if not self.is_running:
             return np.array([]), np.array([])
@@ -64,6 +65,6 @@ class PlaybackManager:
         return x_slice, y_slice
 
     def has_finished(self):
-        """检查播放是否已经自然结束。"""
-        # 当它不再运行，且曾经启动过，就意味着结束了
+        """Checks if the playback has naturally concluded."""
+        # When it is no longer running, and it has been started before, it means it has finished.
         return not self.is_running and self.start_time > 0

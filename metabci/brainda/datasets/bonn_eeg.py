@@ -1,5 +1,3 @@
-# bonn_eeg.py (最终修正版 - 修正文件名格式化)
-
 import mne
 import numpy as np
 from pathlib import Path
@@ -11,7 +9,6 @@ from metabci.brainda.datasets.base import BaseDataset
 class BonnEEGDataset(BaseDataset):
     """
     Bonn EEG Dataset.
-    这个最终版本只负责返回构建MNE Raw对象所需的“原材料”（组件）。
     """
 
     def __init__(self, path: str, subject_ids: List[int] = None):
@@ -56,13 +53,9 @@ class BonnEEGDataset(BaseDataset):
                   update_path=None, verbose=None):
         return [self.root]
 
-    # --------------------------- 关键修正就在这个方法里 ---------------------------
     def _get_single_subject_data(self, subject: Union[str, int]) -> dict:
         """
         核心方法：为单个被试加载数据。
-
-        终极修正：确保无论传入的 subject 是整数还是字符串，
-        都能格式化为三位零填充的字符串来构建正确的文件名。
         """
         all_trials_data, event_names = [], []
         for event_name in self.events.keys():
@@ -73,7 +66,7 @@ class BonnEEGDataset(BaseDataset):
                 event_names.append(event_name)
 
         if not all_trials_data:
-            return {str(subject): {}}  # 返回一个带subject键的空字典，避免下游出错
+            return {str(subject): {}}
 
         concatenated_data = np.concatenate(all_trials_data).reshape(1, -1)
 
@@ -87,6 +80,5 @@ class BonnEEGDataset(BaseDataset):
 
         raw_components = (concatenated_data, info, annotations)
 
-        # 使用字符串形式的subject作为键
         return {str(subject): {'session_0': {'run_0': raw_components}}}
     # -----------------------------------------------------------------------------

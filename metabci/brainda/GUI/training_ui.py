@@ -333,7 +333,7 @@ class TrainingConfigUI:
         lr_start_entry = ttk.Entry(parent, textvariable=self.lr_start_var, width=15)
         lr_start_entry.grid(row=2, column=1, sticky=(tk.W), padx=5, pady=5)
         ToolTip(lr_start_entry, "Learning rate at the start of training")
-        ttk.Label(parent, text="Final Learning Rate:").grid(row=3, column=0, sticky=tk.W, padx=5, pady=5)
+        ttk.Label(parent, text=" Learning Rate:").grid(row=3, column=0, sticky=tk.W, padx=5, pady=5)
         self.lr_end_var = tk.StringVar(value=str(self.config.lr_end))
         lr_end_entry = ttk.Entry(parent, textvariable=self.lr_end_var, width=15)
         lr_end_entry.grid(row=3, column=1, sticky=(tk.W), padx=5, pady=5)
@@ -349,51 +349,35 @@ class TrainingConfigUI:
         folds_entry.grid(row=5, column=1, sticky=(tk.W), padx=5, pady=5)
         ToolTip(folds_entry, "Number of folds for cross-validation")
 
-        # regularization_frame = ttk.LabelFrame(parent, text="Regularization", padding="10")
-        # regularization_frame.grid(row=6, column=0, columnspan=2, sticky=(tk.W, tk.E), padx=5, pady=10)
-
-        # 创建正则化部分框架
+        # Create the regularization section frame
         regularization_frame = ttk.LabelFrame(parent, text="Learnable Parameter Settings", padding="10")
         regularization_frame.grid(row=6, column=0, columnspan=2, sticky=(tk.W, tk.E), padx=5, pady=10)
 
-        # # 添加复选框
-        # self.enable_regularization_var = tk.BooleanVar(value=self.config.enable_regularization)
-        # enable_reg_check = ttk.Checkbutton(
-        #     regularization_frame,
-        #     text="Enable L2 Regularization",
-        #     variable=self.enable_regularization_var,
-        #     command=self.toggle_regularization_fields  # 绑定回调函数
-        # )
-        # enable_reg_check.grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
-
-        # 参数 1：Weight Decay (A)
+        # Parameter 1: Weight Decay (A)
         ttk.Label(regularization_frame, text="Regularization Coefficient (A):").grid(row=2, column=0, sticky=tk.W, padx=5, pady=5)
         self.weight_decay_A_var = tk.StringVar(value=str(self.config.weight_decay_A))
         self.weight_decay_A_entry = ttk.Entry(regularization_frame, textvariable=self.weight_decay_A_var, width=15)
         self.weight_decay_A_entry.grid(row=2, column=1, sticky=tk.W, padx=5, pady=5)
 
-        # 参数 2：Weight Decay (w)
+        # Parameter 2: Weight Decay (w)
         ttk.Label(regularization_frame, text="Regularization Coefficient (w):").grid(row=3, column=0, sticky=tk.W, padx=5, pady=5)
         self.weight_decay_w_var = tk.StringVar(value=str(self.config.weight_decay_w))
         self.weight_decay_w_entry = ttk.Entry(regularization_frame, textvariable=self.weight_decay_w_var, width=15)
         self.weight_decay_w_entry.grid(row=3, column=1, sticky=tk.W, padx=5, pady=5)
 
-        # 参数 3：Learning Rate Factor (A)
+        # Parameter 3: Learning Rate Factor (A)
         ttk.Label(regularization_frame, text="Learning Rate Factor (A):").grid(row=4, column=0, sticky=tk.W, padx=5,
                                                                                pady=5)
         self.lr_factor_A_var = tk.StringVar(value=str(self.config.lr_factor_A))
         self.lr_factor_A_entry = ttk.Entry(regularization_frame, textvariable=self.lr_factor_A_var, width=15)
         self.lr_factor_A_entry.grid(row=4, column=1, sticky=tk.W, padx=5, pady=5)
 
-        # 参数 4：Learning Rate Factor (w)
+        # Parameter 4: Learning Rate Factor (w)
         ttk.Label(regularization_frame, text="Learning Rate Factor (w):").grid(row=5, column=0, sticky=tk.W, padx=5,
                                                                                pady=5)
         self.lr_factor_w_var = tk.StringVar(value=str(self.config.lr_factor_w))
         self.lr_factor_w_entry = ttk.Entry(regularization_frame, textvariable=self.lr_factor_w_var, width=15)
         self.lr_factor_w_entry.grid(row=5, column=1, sticky=tk.W, padx=5, pady=5)
-
-        # # 设置初始状态
-        # self.toggle_regularization_fields()
 
     def create_quantization_frame(self, parent):
         """Create quantization configuration frame"""
@@ -591,7 +575,7 @@ class TrainingConfigUI:
                     widget.config(state='normal')
 
     # def toggle_regularization_fields(self):
-    #     """根据复选框状态启用或禁用正则化参数输入框"""
+    #     """Enable or disable regularization parameter input fields based on the checkbox state"""
     #     state = 'normal' if self.enable_regularization_var.get() else 'disabled'
     #     self.weight_decay_A_entry.config(state=state)
     #     self.weight_decay_w_entry.config(state=state)

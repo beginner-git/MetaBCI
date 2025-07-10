@@ -1,5 +1,3 @@
-# bonn_paradigm.py (终极决定版)
-
 import mne
 import numpy as np
 import pandas as pd
@@ -26,25 +24,18 @@ class BonnEEGParadigm(BaseParadigm):
         used_events, used_intervals = self._map_events_intervals(dataset)
         Xs, ys, metas = {}, {}, {}
 
-        # --------------------------- 终极修正：绕过“污染”数据的 get_data 方法 ---------------------------
-        # 旧代码 (会调用父类方法，导致数据类型被意外改变):
-        # data_from_dataset = dataset.get_data([subject_id])
-        # 新代码 (直接调用我们自己写的、最纯净的数据提供方法):
         data_from_dataset = dataset._get_single_subject_data(subject_id)
-        # ---------------------------------------------------------------------------------------------
 
         for subject, sessions in data_from_dataset.items():
             for session, runs in sessions.items():
-                # 现在，raw_components 就是我们自己定义的那个纯净的元组，不再是字典
                 for run, raw_components in runs.items():
-                    # a. 直接解包这个100%可靠的元组，不再需要任何拆包操作
+                    # a. Directly unpack this 100% reliable tuple, no further unpacking operations needed
                     numpy_data, info, annotations = raw_components
 
-                    # b. 组装成一个功能完整的MNE Raw对象
+                    # b. Assemble into a fully functional MNE Raw object
                     raw = mne.io.RawArray(numpy_data, info, verbose=False)
                     raw.set_annotations(annotations, verbose=False)
 
-                    # 后续所有代码现在都可以正常工作
                     channels = self.select_channels if self.select_channels else dataset.channels
                     picks = pick_channels(raw.ch_names, channels, ordered=True)
                     events, _ = mne.events_from_annotations(raw, event_id=used_events)

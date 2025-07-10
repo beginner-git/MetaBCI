@@ -1,114 +1,68 @@
-# MetaBCI
+# EpiCosCNN-Meta
 
 ## Welcome! 
-MetaBCI is an open-source platform for non-invasive brain computer interface. The project of MetaBCI is led by Prof. Minpeng Xu from Tianjin University, China. MetaBCI has 3 main parts:
-* brainda: for importing dataset, pre-processing EEG data and implementing EEG decoding algorithms.
-* brainflow: a high speed EEG online data processing framework.
-* brainstim: a simple and efficient BCI experiment paradigms design module. 
+This project provides an open-source, interactive platform for end-to-end deep learning analysis of EEG data. It is built upon the brainda framework and features a powerful Graphical User Interface (GUI) to streamline the entire experimental workflow, from data processing to model training and real-time visualization.
 
-This is the first release of MetaBCI, our team will continue to maintain the repository. If you need the handbook of this repository, please contact us by sending email to TBC_TJU_2022@163.com with the following information:
-* Name of your teamleader
-* Name of your university(or organization)
+While the platform is designed to be flexible, its core application focuses on a high-performance Cosine-similarity-based Convolutional Neural Network (CosCNN) for epilepsy detection, achieving state-of-the-art results on standard benchmarks. The project is designed to bridge the gap between complex deep learning algorithms and intuitive, interactive applications for researchers.
 
-We will send you a copy of the handbook as soon as we receive your information.
-
-## Paper
-
-If you find MetaBCI useful in your research, please cite:
+## Citation
 
 Mei, J., Luo, R., Xu, L., Zhao, W., Wen, S., Wang, K., ... & Ming, D. (2023). MetaBCI: An open-source platform for brain-computer interfaces. Computers in Biology and Medicine, 107806.
 
-And this open access paper can be found here: [MetaBCI](https://www.sciencedirect.com/science/article/pii/S0010482523012714)
+G. Liu, L. Tian, Y. Wen, W. Yu, W. Zhou, "Cosine Convolutional Neural Network and Its Application for Seizure Detection," Neural Networks, 2024.
+
+G. Liu, S. Ren, J. Wang, W. Zhou, "Efficient Group Cosine Convolutional Neural Network for EEG-based Seizure Identification," IEEE Transactions on Instrumentation and Measurement, 2025.
+
+beginner-git, "CosCNN-DTQ-Toolbox," 2021. Accessed: Jul. 10, 2025. [Software]. Available: https://github.com/beginner-git/CosCNN-DTQ-Toolbox.
+
 
 ## Content
 
-- [MetaBCI](#metabci)
+- [EpiCosCNN-Meta](#epicoscnn-meta)
   - [Welcome!](#welcome)
-  - [Paper](#paper)
+  - [Citation](#citation)
+  - [Content](#content)
   - [What are we doing?](#what-are-we-doing)
     - [The problem](#the-problem)
     - [The solution](#the-solution)
   - [Features](#features)
   - [Installation](#installation)
-  - [Who are we?](#who-are-we)
-  - [What do we need?](#what-do-we-need)
-  - [Contributing](#contributing)
   - [License](#license)
   - [Contact](#contact)
-  - [Acknowledgements](#acknowledgements)
 
 ## What are we doing?
 
 ### The problem
 
-* BCI datasets come in different formats and standards
-* It's tedious to figure out the details of the data
-* Lack of python implementations of modern decoding algorithms
-* It's not an easy thing to perform BCI experiments especially for the online ones.
-
-If someone new to the BCI wants to do some interesting research, most of their time would be spent on preprocessing the data, reproducing the algorithm in the paper, and also find it difficult to bring the algorithms into BCI experiments.
+* High Barrier to Entry: Setting up a complete deep learning pipeline for EEG analysis is complex and time-consuming, requiring significant effort in data handling, model implementation, and experiment management.
+* Gap Between Algorithm and Application: Researchers often develop powerful algorithms, but applying them in an interactive, visual manner for analysis or real-time feedback is a separate, significant engineering challenge.
+* GUI Performance Bottlenecks: Real-time visualization and model inference can easily block the main thread of a graphical application, leading to a frozen, unresponsive user interface.
+* Repetitive Workflow: Manually configuring experiments, training models, and evaluating results through scripts can be tedious and prone to error.
 
 ### The solution
 
-The Meta-BCI will:
+This platform is designed to solve these problems by providing:
 
-* Allow users to load the data easily without knowing the details
-* Provide flexible hook functions to control the preprocessing flow
-* Provide the latest decoding algorithms
-* Provide the experiment UI for different paradigms (e.g. MI, P300 and SSVEP)
-* Provide the online data acquiring pipeline.
-* Allow users to bring their pre-trained models to the online decoding pipeline.
+* An intuitive GUI "cockpit" that allows users to visually design models, configure parameters, monitor training, and analyze results, significantly simplifying the experimental workflow.
+* A standardized data pipeline that leverages brainda to process raw EEG datasets (like the Bonn database) into clean, ready-to-use JSON files.
+* A high-performance architecture that uses a PredictionWorker (extending brainflow's ProcessWorker) to offload model inference to a background process, ensuring the GUI remains smooth and responsive.
+* A flexible model integration layer that not only features the highly optimized CosCNN but also allows for easy integration of other architectures (e.g., EEGNet, Deep4Net, ShallowNet) through a CustomModel adapter pattern.
 
-The goal of the Meta-BCI is to make researchers focus on improving their own BCI algorithms and performing their experiments without wasting too much time on preliminary preparations.
+The goal is to empower researchers to focus on developing and testing novel algorithms without getting bogged down in repetitive engineering tasks.
 
 ## Features
 
-* Improvements to MOABB APIs
-   - add hook functions to control the preprocessing flow more easily
-   - use joblib to accelerate the data loading
-   - add proxy options for network connection issues
-   - add more information in the meta of data
-   - other small changes
-
-* Supported Datasets
-   - MI Datasets
-     - AlexMI
-     - BNCI2014001, BNCI2014004
-     - PhysionetMI, PhysionetME
-     - Cho2017
-     - MunichMI
-     - Schirrmeister2017
-     - Weibo2014
-     - Zhou2016
-   - SSVEP Datasets
-     - Nakanishi2015
-     - Wang2016
-     - BETA
-
-* Implemented BCI algorithms
-   - Decomposition Methods
-     - SPoC, CSP, MultiCSP and FBCSP
-     - CCA, itCCA, MsCCA, ExtendCCA, ttCCA, MsetCCA, MsetCCA-R, TRCA, TRCA-R, SSCOR and TDCA
-     - DSP
-   - Manifold Learning
-     - Basic Riemannian Geometry operations
-     - Alignment methods
-     - Riemann Procustes Analysis
-   - Deep Learning
-     - ShallowConvNet
-     - EEGNet
-     - ConvCA
-     - GuneyNet
-     - Cross dataset transfer learning based on pre-training
-   - Transfer Learning
-     - MEKT
-     - LST
+* End-to-End Interactive Workflow: A complete solution from raw data processing to advanced model training, evaluation, and visualization.
+* High-Performance CosCNN Model: Includes a deeply integrated Cosine Convolutional Network (CosCNN) that achieves up to 98.4% accuracy on the Bonn epilepsy dataset.
+* Intuitive GUI for Experimentation: Visually configure all aspects of the training process, monitor metrics in real-time, and observe predictions on single samples.
+* Flexible Model Integration: Easily swap or add new deep learning models using a lazy-initialized adapter pattern. Support for architectures like EEGNet, Deep4Net, and ShallowNet is built-in.
+* Non-Blocking Real-Time Prediction: Ensures a smooth and responsive UI during computationally intensive tasks thanks to a dedicated background worker process.
 
 ## Installation
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/TBC-TJU/MetaBCI.git
+   git clone https://github.com/beginner-git/MetaBCI
    ```
 2. Change to the project directory
    ```sh
@@ -122,30 +76,6 @@ The goal of the Meta-BCI is to make researchers focus on improving their own BCI
    ```sh
    pip install -e .
    ```
-## Who are we?
-
-The MetaBCI project is carried out by researchers from 
-- Academy of Medical Engineering and Translational Medicine, Tianjin University, China
-- Tianjin Brain Center, China
-
-
-## What do we need?
-
-**You**! In whatever way you can help.
-
-We need expertise in programming, user experience, software sustainability, documentation and technical writing and project management.
-
-We'd love your feedback along the way.
-
-## Contributing
-
-Contributions are what make the open source community such an amazing place to be learn, inspire, and create. **Any contributions you make are greatly appreciated**. Especially welcome to submit BCI algorithms.
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
 
 ## License
 
@@ -153,13 +83,4 @@ Distributed under the GNU General Public License v2.0 License. See `LICENSE` for
 
 ## Contact
 
-Email: TBC_TJU_2022@163.com
-
-## Acknowledgements
-- [MNE](https://github.com/mne-tools/mne-python)
-- [MOABB](https://github.com/NeuroTechX/moabb)
-- [pyRiemann](https://github.com/alexandrebarachant/pyRiemann)
-- [TRCA/eTRCA](https://github.com/mnakanishi/TRCA-SSVEP)
-- [EEGNet](https://github.com/vlawhern/arl-eegmodels)
-- [RPA](https://github.com/plcrodrigues/RPA)
-- [MEKT](https://github.com/chamwen/MEKT)
+If there is any technical issue, please contact the corresponding author Guoyang Liu: gyliu@sdu.edu.cn (please also cc virter1995@outlook.com) Visit http://guoyang.work/ for more related works.

@@ -27,6 +27,7 @@ class ModelTrainer:
         params_A = [param for name, param in model.named_parameters() if 'A' in name]
         params_w = [param for name, param in model.named_parameters() if 'w' in name]
         # params_other = [param for name, param in model.named_parameters() if 'A' not in name and 'w' not in name]
+
         # Define parameter groups for optimizer
         param_groups = [
             {'params': params_A,
@@ -70,7 +71,7 @@ class ModelTrainer:
             scheduler.step()
 
             if (epoch + 1) % 10 == 0:
-                val_accuracy = evaluate(model, val_loader, self.device)  # 调用模块级函数
+                val_accuracy = evaluate(model, val_loader, self.device)  # Call the module-level function
                 print(f'Epoch [{epoch + 1}/{self.config.max_epochs}], '
                       f'Loss: {running_loss / len(train_loader):.4f}, '
                       f'Val Accuracy: {val_accuracy * 100:.2f}%')
@@ -80,7 +81,7 @@ class ModelTrainer:
                     best_model_state = copy.deepcopy(model.state_dict())
 
         model.load_state_dict(best_model_state)
-        test_results = test(model, test_loader, self.device)  # 调用模块级函数
+        test_results = test(model, test_loader, self.device)  # Call the module-level function
 
         return model, test_results['accuracy'], test_results['confusion_matrix']
 
